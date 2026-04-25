@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Health Voice Copilot</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Urbanist:wght@500;600;700;800&display=swap');
+
+        :root {
+            --bg-0: #081824;
+            --bg-1: #0d2233;
+            --bg-2: #112f3d;
+            --text-0: #f3fbff;
+            --text-1: #d7ebf6;
+            --text-2: #9ab8c8;
+            --glass: rgba(255, 255, 255, 0.11);
+            --glass-strong: rgba(255, 255, 255, 0.16);
+            --line: rgba(211, 239, 255, 0.2);
+            --accent: #4ee2c1;
+            --accent-2: #2cc5f5;
+            --danger: #ff7a7a;
+            --ok: #61efac;
+            --shadow: 0 20px 50px rgba(3, 10, 15, 0.45);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Inter, Urbanist, "SF Pro Text", "SF Pro Display", "Segoe UI", Arial, sans-serif;
+            color: var(--text-0);
+            background:
+                radial-gradient(circle at 8% 12%, rgba(78, 226, 193, 0.18), transparent 35%),
+                radial-gradient(circle at 85% 78%, rgba(44, 197, 245, 0.16), transparent 38%),
+                linear-gradient(160deg, var(--bg-0) 0%, var(--bg-1) 48%, var(--bg-2) 100%);
+            min-height: 100vh;
+            padding: 24px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+        }
+
+        header {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.08));
+            border: 1px solid var(--line);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            padding: 24px;
+            border-radius: 18px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            animation: riseIn 0.6s ease;
+        }
+
+        header h1 {
+            font-family: Urbanist, Inter, "SF Pro Display", sans-serif;
+            font-weight: 800;
+            letter-spacing: 0.2px;
+            margin-bottom: 6px;
+            color: #ffffff;
+            text-shadow: 0 2px 16px rgba(78, 226, 193, 0.25);
+        }
+
+        header p {
+            color: var(--text-1);
+            font-size: 14px;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--ok);
+            margin-right: 8px;
+            box-shadow: 0 0 0 8px rgba(97, 239, 172, 0.18);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.08); opacity: 0.72; }
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: linear-gradient(145deg, var(--glass-strong), var(--glass));
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            padding: 22px;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            box-shadow: var(--shadow);
+            animation: riseIn 0.55s ease;
+        }
+
+        .card h2 {
+            color: #ffffff;
+            margin-bottom: 15px;
+            font-size: 18px;
+            font-family: Urbanist, Inter, "SF Pro Display", sans-serif;
+            font-weight: 700;
+            border-bottom: 1px solid rgba(219, 244, 255, 0.22);
+            padding-bottom: 12px;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            color: var(--text-1);
+            font-weight: 600;
+            font-size: 13px;
+            letter-spacing: 0.3px;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 11px 12px;
+            border: 1px solid rgba(224, 245, 255, 0.2);
+            border-radius: 10px;
+            font-size: 14px;
+            color: var(--text-0);
+            background: rgba(7, 28, 42, 0.42);
+            font-family: inherit;
+            transition: all 0.2s ease;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 84px;
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: rgba(78, 226, 193, 0.72);
+            box-shadow: 0 0 0 4px rgba(78, 226, 193, 0.14);
+            background: rgba(7, 28, 42, 0.56);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 10px 16px;
+            border: 1px solid transparent;
+            border-radius: 10px;
+            font-size: 13px;
+            cursor: pointer;
+            font-weight: 700;
+            letter-spacing: 0.2px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+            color: #032838;
+            box-shadow: 0 10px 24px rgba(44, 197, 245, 0.24);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 28px rgba(44, 197, 245, 0.32);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.11);
+            border-color: rgba(220, 244, 255, 0.24);
+            color: var(--text-0);
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.18);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #74f3bf 0%, #3cd7a0 100%);
+            color: #042f25;
+            box-shadow: 0 10px 24px rgba(60, 215, 160, 0.24);
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 28px rgba(60, 215, 160, 0.32);
+        }
+
+        .chat-box {
+            border: 1px solid rgba(224, 245, 255, 0.2);
+            border-radius: 12px;
+            height: 320px;
+            overflow-y: auto;
+            padding: 14px;
+            margin-bottom: 15px;
+            background: rgba(7, 28, 42, 0.42);
+        }
+
+        .chat-box::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .chat-box::-webkit-scrollbar-thumb {
+            background: rgba(201, 232, 246, 0.35);
+            border-radius: 10px;
+        }
+
+        .message {
+            margin-bottom: 12px;
+            padding: 11px 13px;
+            border-radius: 10px;
+            word-wrap: break-word;
+            font-size: 13px;
+            line-height: 1.45;
+        }
+
+        .message.user {
+            background: linear-gradient(135deg, rgba(44, 197, 245, 0.92), rgba(78, 226, 193, 0.85));
+            color: #05293b;
+            margin-left: 30px;
+            text-align: right;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .message.assistant {
+            background: rgba(255, 255, 255, 0.14);
+            color: var(--text-0);
+            margin-right: 30px;
+            text-align: left;
+            border: 1px solid rgba(227, 246, 255, 0.18);
+        }
+
+        .message.system {
+            background: rgba(255, 221, 128, 0.25);
+            color: #ffe8be;
+            margin: 0;
+            text-align: center;
+            font-size: 12px;
+            border: 1px solid rgba(255, 221, 128, 0.4);
+        }
+
+        .voice-controls {
+            background: linear-gradient(145deg, rgba(6, 36, 52, 0.48), rgba(8, 28, 42, 0.36));
+            border: 1px dashed rgba(142, 225, 245, 0.5);
+            border-radius: 14px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        #liveVoiceBtn {
+            border: 1px solid rgba(216, 245, 255, 0.35) !important;
+            background: radial-gradient(circle at 30% 20%, #6ef0d0 0%, #26c5f5 65%, #1393d4 100%) !important;
+            color: #043247 !important;
+            font-family: Urbanist, Inter, "SF Pro Display", sans-serif;
+            font-weight: 800;
+            box-shadow: 0 16px 32px rgba(15, 175, 228, 0.28);
+        }
+
+        #liveVoiceBtn:hover {
+            transform: translateY(-2px) scale(1.02) !important;
+        }
+
+        .recording-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            background: var(--danger);
+            border-radius: 50%;
+            margin-right: 6px;
+            animation: blink 0.6s infinite;
+        }
+
+        @keyframes blink {
+            0%, 49% { opacity: 1; }
+            50%, 100% { opacity: 0.2; }
+        }
+
+        .result-box {
+            background: rgba(8, 40, 58, 0.5);
+            border: 1px solid rgba(190, 237, 255, 0.24);
+            border-left: 4px solid var(--accent-2);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+
+        .result-box h3 {
+            color: #d8f4ff;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .result-box p {
+            font-size: 13px;
+            color: var(--text-1);
+            line-height: 1.5;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            padding: 8px;
+            border-radius: 14px;
+            border: 1px solid var(--line);
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            padding: 10px 14px;
+            background: transparent;
+            border: 1px solid transparent;
+            color: var(--text-1);
+            cursor: pointer;
+            font-weight: 700;
+            border-radius: 10px;
+            transition: all 0.2s;
+        }
+
+        .tab-btn:hover {
+            background: rgba(255, 255, 255, 0.11);
+            color: #ffffff;
+        }
+
+        .tab-btn.active {
+            color: #042b3e;
+            background: linear-gradient(135deg, var(--accent) 0%, #95f0ff 100%);
+            border-color: rgba(255, 255, 255, 0.35);
+            box-shadow: 0 8px 18px rgba(57, 218, 243, 0.26);
+        }
+
+        .tab-content {
+            display: none;
+            animation: riseIn 0.36s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(225, 242, 250, 0.22);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .agent-decision {
+            background: rgba(9, 45, 62, 0.45);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            border: 1px solid rgba(196, 236, 250, 0.24);
+        }
+
+        .stream-stage {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .stage-chip {
+            font-size: 11px;
+            letter-spacing: 0.35px;
+            font-weight: 700;
+            padding: 6px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(199, 235, 248, 0.28);
+            color: var(--text-2);
+            background: rgba(255, 255, 255, 0.06);
+            transition: all 0.18s ease;
+        }
+
+        .stage-chip.active {
+            color: #042d3f;
+            border-color: rgba(255, 255, 255, 0.36);
+            background: linear-gradient(135deg, var(--accent), #9ef4ff);
+            box-shadow: 0 8px 16px rgba(44, 197, 245, 0.24);
+        }
+
+        .stage-chip.done {
+            color: #d2fff0;
+            border-color: rgba(116, 243, 191, 0.55);
+            background: rgba(116, 243, 191, 0.2);
+        }
+
+        .stage-chip.error {
+            color: #ffd4d4;
+            border-color: rgba(255, 122, 122, 0.55);
+            background: rgba(255, 122, 122, 0.2);
+        }
+
+        .agent-decision div {
+            margin-bottom: 10px;
+            font-size: 13px;
+            color: var(--text-1);
+        }
+
+        .agent-decision strong {
+            color: #d9f7ff;
+        }
+
+        .alert {
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            font-size: 13px;
+            border: 1px solid transparent;
+        }
+
+        .alert.danger {
+            background: rgba(255, 122, 122, 0.18);
+            color: #ffd6d6;
+            border-color: rgba(255, 122, 122, 0.38);
+        }
+
+        .alert.success {
+            background: rgba(97, 239, 172, 0.16);
+            color: #d0ffe7;
+            border-color: rgba(97, 239, 172, 0.4);
+        }
+
+        .alert.info {
+            background: rgba(80, 204, 247, 0.16);
+            color: #d4f2ff;
+            border-color: rgba(80, 204, 247, 0.4);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        footer {
+            text-align: center;
+            color: var(--text-1);
+            margin-top: 30px;
+            font-size: 12px;
+        }
+
+        .section {
+            margin-bottom: 20px;
+        }
+
+        .meta-strip {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+            margin: 0 0 18px;
+            animation: riseIn 0.7s ease;
+        }
+
+        .kpi {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(214, 241, 252, 0.22);
+            border-radius: 12px;
+            padding: 12px 14px;
+        }
+
+        .kpi .kpi-title {
+            color: var(--text-2);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.7px;
+            margin-bottom: 6px;
+        }
+
+        .kpi .kpi-value {
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .quick-btn {
+            width: 100%;
+            text-align: left;
+            margin-bottom: 8px;
+        }
+
+        @keyframes riseIn {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 1024px) {
+            body {
+                padding: 16px;
+            }
+
+            .main-grid {
+                grid-template-columns: 1fr;
+                gap: 14px;
+            }
+
+            .card {
+                padding: 16px;
+            }
+
+            #liveVoiceBtn {
+                width: 132px !important;
+                height: 132px !important;
+                font-size: 16px !important;
+            }
+
+            .meta-strip {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div style="position: fixed; width: 360px; height: 360px; border-radius: 50%; background: radial-gradient(circle, rgba(78, 226, 193, 0.32) 0%, rgba(78, 226, 193, 0.02) 70%); filter: blur(12px); top: -110px; left: -70px; z-index: 0; pointer-events: none;"></div>
+    <div style="position: fixed; width: 420px; height: 420px; border-radius: 50%; background: radial-gradient(circle, rgba(44, 197, 245, 0.28) 0%, rgba(44, 197, 245, 0.02) 72%); filter: blur(16px); bottom: -140px; right: -80px; z-index: 0; pointer-events: none;"></div>
+    <div class="container">
+        <header>
+            <h1><span class="status-indicator"></span>Personal Health Voice Copilot</h1>
+            <p>Clinical AI assistant for voice interaction, evidence retrieval, care-guidance tools, and secure conversational memory.</p>
+        </header>
+
+        <div class="meta-strip">
+            <div class="kpi">
+                <div class="kpi-title">Deployment Profile</div>
+                <div class="kpi-value">Hospital Demonstration Mode</div>
+            </div>
+            <div class="kpi">
+                <div class="kpi-title">Interaction Modes</div>
+                <div class="kpi-value">Text, Live Voice, Decision Tools</div>
+            </div>
+            <div class="kpi">
+                <div class="kpi-title">Safety Posture</div>
+                <div class="kpi-value">Triage-aware, Non-diagnostic Guidance</div>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('chat')">Clinical Chat</button>
+            <button class="tab-btn" onclick="switchTab('voice')">Live Voice</button>
+            <button class="tab-btn" onclick="switchTab('tools')">Clinical Calculators</button>
+            <button class="tab-btn" onclick="switchTab('memory')">Context Memory</button>
+            <button class="tab-btn" onclick="switchTab('docs')">System Overview</button>
+        </div>
+
+        <!-- Chat Tab -->
+        <div id="chat-tab" class="tab-content active">
+            <div class="main-grid">
+                <div class="card">
+                    <h2>Clinical Text Consultation</h2>
+                    <div class="input-group">
+                        <label>Session Identifier</label>
+                        <input type="text" id="userId" value="demo-user">
+                    </div>
+                    <div class="input-group">
+                        <label>Clinical Question</label>
+                        <textarea id="chatInput" placeholder="Enter a patient-focused question or scenario..."></textarea>
+                    </div>
+                    <div class="button-group">
+                        <button class="btn-primary" onclick="sendChatQuery()">Submit Query</button>
+                        <button class="btn-secondary" onclick="clearChat()">Clear Session</button>
+                    </div>
+
+                    <div style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 15px;">
+                        <h4 style="color: #d8f4ff; font-size: 13px; margin-bottom: 10px;">Suggested Demonstration Prompts</h4>
+                        <div style="display: flex; flex-direction: column; gap: 6px;">
+                            <button class="btn-secondary quick-btn" onclick="quickQuery('What should I do if I have a headache?')">What should I do if I have a headache?</button>
+                            <button class="btn-secondary quick-btn" onclick="quickQuery('How much water should I drink daily?')">How much water should I drink daily?</button>
+                            <button class="btn-secondary quick-btn" onclick="quickQuery('I have chest pain, should I go to ER?')">I have chest pain, should I go to ER?</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>Response and Orchestration Trace</h2>
+                    <div class="stream-stage" id="streamStageBar">
+                        <span class="stage-chip" id="stage-planning">Planning</span>
+                        <span class="stage-chip" id="stage-context">Retrieving Context</span>
+                        <span class="stage-chip" id="stage-generating">Generating</span>
+                        <span class="stage-chip" id="stage-finalized">Finalized</span>
+                    </div>
+                    <div class="chat-box" id="chatBox"></div>
+                    <div id="agentDecision" class="agent-decision hidden">
+                        <div><strong>Detected Intent:</strong> <span id="intentText"></span></div>
+                        <div><strong>Execution Path:</strong> <span id="actionsText"></span></div>
+                        <div><strong>Urgency Classification:</strong> <span id="statusText"></span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Voice Tab -->
+        <div id="voice-tab" class="tab-content">
+            <div class="main-grid">
+                <div class="card">
+                    <h2>Live Voice Consultation</h2>
+                    <div class="input-group">
+                        <label>Session Identifier</label>
+                        <input type="text" id="voiceUserId" value="demo-user">
+                    </div>
+
+                    <div class="voice-controls" style="text-align: center; padding: 30px 0;">
+                        <p style="margin: 0 0 20px; color: #d0e7f4; font-size: 14px;">Press and hold to capture voice input</p>
+                        <button 
+                            id="liveVoiceBtn" 
+                            class="btn-primary" 
+                            style="
+                                font-size: 18px; 
+                                padding: 30px 40px; 
+                                border-radius: 50%;
+                                width: 160px; 
+                                height: 160px;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                margin: 0 auto;
+                                transition: all 0.2s;
+                                border: 3px solid transparent;
+                            "
+                            onmousedown="startLiveRecording()"
+                            onmouseup="stopLiveRecording()"
+                            onmouseleave="cancelLiveRecording()"
+                            ontouchstart="startLiveRecording()"
+                            ontouchend="stopLiveRecording()"
+                        >Hold to Speak</button>
+                        <div id="liveStatus" style="margin-top: 20px; color: #d0e7f4; font-size: 13px; min-height: 20px;"></div>
+                    </div>
+
+                    <div style="margin: 25px 0; padding: 15px; background: rgba(255, 255, 255, 0.08); border-radius: 10px; border: 1px solid rgba(207, 238, 250, 0.24);">
+                        <p style="margin: 0; font-size: 12px; color: #d7ebf6; line-height: 1.45;">
+                            <strong>Interaction flow:</strong><br>
+                            Hold the control to record, release to process. The assistant transcribes, routes, and returns a spoken response automatically.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>Voice Response</h2>
+                    <div id="voiceResult" style="min-height: 300px; display: flex; align-items: center; justify-content: center;">
+                        <p style="color: #d0e7f4; text-align: center;">Voice transcript and response output will appear here.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tools Tab -->
+        <div id="tools-tab" class="tab-content">
+            <div class="main-grid">
+                <div class="card">
+                    <h2>BMI Assessment</h2>
+                    <div class="input-group">
+                        <label>Weight (kg)</label>
+                        <input type="number" id="bmiWeight" placeholder="75" step="0.1" value="75">
+                    </div>
+                    <div class="input-group">
+                        <label>Height (cm)</label>
+                        <input type="number" id="bmiHeight" placeholder="180" step="0.1" value="180">
+                    </div>
+                    <button class="btn-primary" onclick="calculateBMI()">Calculate</button>
+                    <div id="bmiResult"></div>
+                </div>
+
+                <div class="card">
+                    <h2>Hydration Assessment</h2>
+                    <div class="input-group">
+                        <label>Weight (kg)</label>
+                        <input type="number" id="hydrationWeight" placeholder="75" step="0.1" value="75">
+                    </div>
+                    <div class="input-group">
+                        <label>Activity Level</label>
+                        <select id="activityLevel">
+                            <option value="low">Low</option>
+                            <option value="moderate" selected>Moderate</option>
+                            <option value="high">High</option>
+                        </select>
+                    </div>
+                    <button class="btn-primary" onclick="calculateHydration()">Calculate</button>
+                    <div id="hydrationResult"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Memory Tab -->
+        <div id="memory-tab" class="tab-content">
+            <div class="card">
+                <h2>Context Memory</h2>
+                <p style="color: #d7ebf6; margin-bottom: 15px; font-size: 13px;">
+                    Conversation context is embedded and stored in FAISS to support continuity and semantically-aware recall.
+                </p>
+                <div class="alert info">
+                    All session queries are indexed for contextual follow-up responses.
+                </div>
+                <div class="input-group">
+                    <label>Memory Retrieval Query</label>
+                    <textarea id="memoryQuery" placeholder="Example: Summarize earlier guidance about headaches." style="min-height: 60px;"></textarea>
+                </div>
+                <button class="btn-primary" onclick="recallMemory()">Retrieve Context</button>
+                <div id="memoryResult" style="margin-top: 20px;"></div>
+            </div>
+        </div>
+
+        <!-- Docs Tab -->
+        <div id="docs-tab" class="tab-content">
+            <div class="card">
+                <h2>System Architecture Overview</h2>
+                
+                <div class="section">
+                    <h4 style="color: #d8f4ff; margin-bottom: 10px;">Agent Roles</h4>
+                    <div style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(207, 238, 250, 0.2); padding: 12px; border-radius: 8px; font-size: 12px; color: #d7ebf6;">
+                        <div style="margin-bottom: 8px;"><strong>Orchestrator:</strong> Selects optimal response strategy (direct, retrieval, or tool-driven).</div>
+                        <div style="margin-bottom: 8px;"><strong>Planner:</strong> Interprets intent and defines execution steps.</div>
+                        <div style="margin-bottom: 8px;"><strong>RAG Agent:</strong> Retrieves relevant domain context from vector search.</div>
+                        <div style="margin-bottom: 8px;"><strong>Tool Agent:</strong> Executes structured clinical calculators and checks.</div>
+                        <div><strong>Memory Agent:</strong> Persists and retrieves semantically related session history.</div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h4 style="color: #d8f4ff; margin-bottom: 10px;">Processing Pipeline</h4>
+                    <div style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(207, 238, 250, 0.2); padding: 12px; border-radius: 8px; font-size: 12px; color: #d7ebf6;">
+                        Input ingestion (text or voice) -> intent planning -> route selection -> contextual/tool execution -> safety policy checks -> structured response and optional speech output.
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h4 style="color: #d8f4ff; margin-bottom: 10px;">Technology Stack</h4>
+                    <div style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(207, 238, 250, 0.2); padding: 12px; border-radius: 8px; font-size: 12px; color: #d7ebf6;">
+                        <div>LLM: Google Gemini</div>
+                        <div>Embeddings: MiniLM-L6-v2 (384 dimensions)</div>
+                        <div>Vector Database: FAISS</div>
+                        <div>Speech-to-Text: faster-whisper</div>
+                        <div>Text-to-Speech: Google TTS</div>
+                        <div>Backend Runtime: FastAPI on Python 3.11</div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h4 style="color: #d8f4ff; margin-bottom: 10px;">Safety and Governance</h4>
+                    <div class="alert danger">Urgent symptom patterns are flagged for immediate escalation guidance.</div>
+                    <div class="alert info">Responses are informational and avoid diagnostic claims.</div>
+                    <div class="alert success">Context memory supports continuity while preserving conversation-level relevance.</div>
+                </div>
+            </div>
+        </div>
+
+        <footer>Personal Health Voice Copilot | Demonstration Environment | API Documentation: <a href="http://localhost:8000/docs" target="_blank" style="color: #d8f4ff; text-decoration: underline;">OpenAPI Console</a></footer>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000';
+        let mediaRecorder;
+        let audioChunks = [];
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabName + '-tab').classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function quickQuery(text) {
+            document.getElementById('chatInput').value = text;
+            sendChatQuery();
+        }
+
+        // Live voice agent state
+        let liveMediaRecorder;
+        let liveAudioChunks = [];
+        let isRecording = false;
+
+        async function startLiveRecording() {
+            if (isRecording) return;
+            isRecording = true;
+
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                liveMediaRecorder = new MediaRecorder(stream);
+                liveAudioChunks = [];
+
+                liveMediaRecorder.ondataavailable = (event) => liveAudioChunks.push(event.data);
+                
+                // Visual feedback
+                const btn = document.getElementById('liveVoiceBtn');
+                btn.style.background = 'linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%)';
+                btn.style.borderColor = '#ff6b6b';
+                btn.style.transform = 'scale(0.95)';
+                btn.textContent = 'Listening...';
+                
+                document.getElementById('liveStatus').textContent = 'Capturing audio input...';
+                document.getElementById('voiceResult').innerHTML = '<div class="loading"></div><p>Audio input is being captured for processing.</p>';
+
+                liveMediaRecorder.start();
+            } catch (error) {
+                isRecording = false;
+                document.getElementById('liveStatus').textContent = 'Microphone access unavailable';
+                alert('Please allow microphone access');
+            }
+        }
+
+        function stopLiveRecording() {
+            if (!isRecording || !liveMediaRecorder) return;
+            
+            isRecording = false;
+            liveMediaRecorder.stop();
+            liveMediaRecorder.stream.getTracks().forEach(track => track.stop());
+
+            // Reset visual feedback
+            const btn = document.getElementById('liveVoiceBtn');
+            btn.style.background = '';
+            btn.style.borderColor = '';
+            btn.style.transform = '';
+            btn.textContent = 'Hold to Speak';
+            
+            document.getElementById('liveStatus').textContent = 'Processing transcription and response...';
+
+            // Auto-process
+            setTimeout(() => {
+                if (liveAudioChunks.length > 0) {
+                    const audioBlob = new Blob(liveAudioChunks, { type: 'audio/wav' });
+                    const audioFile = new File([audioBlob], 'voice.wav', { type: 'audio/wav' });
+                    processLiveAudio(audioFile);
+                }
+            }, 100);
+        }
+
+        function cancelLiveRecording() {
+            if (!isRecording || !liveMediaRecorder) return;
+            isRecording = false;
+            liveMediaRecorder.stop();
+            liveMediaRecorder.stream.getTracks().forEach(track => track.stop());
+            
+            const btn = document.getElementById('liveVoiceBtn');
+            btn.style.background = '';
+            btn.style.borderColor = '';
+            btn.style.transform = '';
+            btn.textContent = 'Hold to Speak';
+        }
+
+        async function processLiveAudio(audioFile) {
+            const userId = document.getElementById('voiceUserId').value;
+            const formData = new FormData();
+            formData.append('audio', audioFile);
+            formData.append('user_id', userId);
+
+            try {
+                const response = await fetch(`${API_BASE}/voice/query`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.detail || `HTTP ${response.status}`);
+                }
+
+                document.getElementById('liveStatus').textContent = 'Audio received. Generating response...';
+
+                // Display results
+                let html = '<div class="result-box">';
+                html += `<h3>Transcript</h3><p><em>"${escapeHtml(data.transcript)}"</em></p>`;
+                html += `<h3 style="margin-top: 15px;">Assistant Response</h3><p>${escapeHtml(data.response_text)}</p>`;
+                html += '</div>';
+
+                // Auto-play audio response if available
+                if (data.output_audio_path && data.output_audio_path !== 'tts_generation_pending') {
+                    html += `<div style="margin-top: 15px; padding: 12px; background: #e8f5e9; border-radius: 6px; text-align: center;">
+                        <small style="color: #2e7d32;">Playing synthesized response audio...</small>
+                    </div>`;
+                    
+                    setTimeout(() => {
+                        playAudioResponse(data.output_audio_path);
+                    }, 300);
+                }
+
+                document.getElementById('voiceResult').innerHTML = html;
+                document.getElementById('liveStatus').textContent = 'Ready for the next query.';
+
+            } catch (error) {
+                document.getElementById('liveStatus').textContent = 'Processing error: ' + escapeHtml(error.message);
+                document.getElementById('voiceResult').innerHTML = `<div class="alert danger">Error: ${escapeHtml(error.message)}</div>`;
+            }
+        }
+
+        function playAudioResponse(audioPath) {
+            // Convert absolute path to relative URL
+            let audioUrl = audioPath;
+            if (audioPath.includes('\\')) {
+                // Windows path - extract just the filename
+                audioUrl = 'storage/' + audioPath.split('\\').pop();
+            } else if (audioPath.startsWith('/')) {
+                // Absolute Unix path
+                audioUrl = 'storage/' + audioPath.split('/').pop();
+            } else if (!audioPath.startsWith('storage/')) {
+                // Just add storage prefix if not already there
+                audioUrl = 'storage/' + audioPath;
+            }
+
+            const audio = new Audio(`${API_BASE}/${audioUrl}`);
+            audio.onplay = () => {
+                document.getElementById('liveStatus').textContent = 'Audio response in progress...';
+            };
+            audio.onended = () => {
+                document.getElementById('liveStatus').textContent = 'Voice response completed. Ready for next query.';
+            };
+            audio.onerror = (e) => {
+                console.warn('Could not play audio:', `${API_BASE}/${audioUrl}`, e);
+                document.getElementById('liveStatus').textContent = 'Audio playback unavailable for this response.';
+            };
+            audio.play().catch(err => {
+                console.error('Play error:', err);
+                document.getElementById('liveStatus').textContent = 'Unable to start audio playback.';
+            });
+        }
+
+        async function sendChatQuery() {
+            const userId = document.getElementById('userId').value;
+            const query = document.getElementById('chatInput').value;
+
+            if (!query.trim()) {
+                alert('Please enter a query');
+                return;
+            }
+
+            addMessage('user', query);
+            document.getElementById('chatInput').value = '';
+
+            const assistantMsg = addMessage('assistant', 'Preparing response...');
+            resetStreamStages();
+            setStreamStage('planning');
+
+            try {
+                const response = await fetch(`${API_BASE}/chat/query/stream`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: userId, query: query })
+                });
+
+                if (!response.ok || !response.body) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
+                let streamedText = '';
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop() || '';
+
+                    for (const line of lines) {
+                        if (!line.trim()) continue;
+                        const evt = JSON.parse(line);
+
+                        if (evt.type === 'meta' && evt.plan) {
+                            setStreamStage('planning', true);
+                            const routeSteps = Array.isArray(evt.route)
+                                ? evt.route
+                                : (evt.plan.steps || []).map(step => step.action);
+                            if (routeSteps.some(action => ['memory', 'rag', 'tool'].includes(action))) {
+                                setStreamStage('context');
+                                setStreamStage('context', true);
+                            }
+                            showAgentDecision(evt.plan, { tool_results: {}, retrieved_context: [] });
+                        } else if (evt.type === 'token') {
+                            setStreamStage('generating');
+                            streamedText += evt.content;
+                            assistantMsg.textContent = streamedText;
+                        } else if (evt.type === 'final' && evt.data) {
+                            setStreamStage('generating', true);
+                            setStreamStage('finalized', true);
+                            assistantMsg.textContent = evt.data.response_text;
+                            if (evt.data.plan) {
+                                showAgentDecision(evt.data.plan, evt.data);
+                            }
+                        } else if (evt.type === 'error') {
+                            setStreamStage('generating', false, true);
+                            throw new Error(evt.message || 'Streaming failed');
+                        }
+                    }
+                }
+
+                if (!streamedText && assistantMsg.textContent === 'Preparing response...') {
+                    assistantMsg.textContent = 'No response generated.';
+                }
+            } catch (error) {
+                setStreamStage('finalized', false, true);
+                assistantMsg.remove();
+                addMessage('system', `Error: ${error.message}`);
+            }
+        }
+
+        function addMessage(role, content) {
+            const box = document.getElementById('chatBox');
+            const msg = document.createElement('div');
+            msg.className = `message ${role}`;
+            msg.textContent = content;
+            box.appendChild(msg);
+            box.scrollTop = box.scrollHeight;
+            return msg;
+        }
+
+        function showAgentDecision(plan, data) {
+            const container = document.getElementById('agentDecision');
+            let intent = plan.intent || 'unknown';
+            let route = plan.steps ? plan.steps.map(s => s.action).join(' → ') : 'direct';
+            if (data.tool_results && Object.keys(data.tool_results).length > 0) {
+                route += ` [tools]`;
+            }
+            if (data.retrieved_context && data.retrieved_context.length > 0) {
+                route += ` [rag]`;
+            }
+            let status = plan.urgent ? 'Urgent Review Recommended' : 'Standard Priority';
+            
+            document.getElementById('intentText').textContent = intent;
+            document.getElementById('actionsText').textContent = route;
+            document.getElementById('statusText').textContent = status;
+            container.classList.remove('hidden');
+        }
+
+        function clearChat() {
+            document.getElementById('chatBox').innerHTML = '';
+            document.getElementById('agentDecision').classList.add('hidden');
+            resetStreamStages();
+        }
+
+        function resetStreamStages() {
+            ['planning', 'context', 'generating', 'finalized'].forEach((stage) => {
+                const chip = document.getElementById(`stage-${stage}`);
+                if (!chip) return;
+                chip.classList.remove('active', 'done', 'error');
+            });
+        }
+
+        function setStreamStage(stage, done = false, error = false) {
+            const chip = document.getElementById(`stage-${stage}`);
+            if (!chip) return;
+
+            chip.classList.remove('active', 'done', 'error');
+            if (error) {
+                chip.classList.add('error');
+                return;
+            }
+            if (done) {
+                chip.classList.add('done');
+                return;
+            }
+            chip.classList.add('active');
+        }
+
+        async function calculateBMI() {
+            const weight = parseFloat(document.getElementById('bmiWeight').value);
+            const height = parseFloat(document.getElementById('bmiHeight').value);
+
+            if (!weight || !height) {
+                alert('Enter weight and height');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/tools/bmi`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ weight_kg: weight, height_cm: height })
+                });
+
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+                const data = await response.json();
+                
+                let html = '<div class="result-box">';
+                html += `<h3>BMI: ${data.bmi.toFixed(1)}</h3>`;
+                html += `<p><strong>Category:</strong> ${data.category}</p>`;
+                html += `<p><strong>Recommendation:</strong> ${data.recommendation}</p>`;
+                html += '</div>';
+                
+                document.getElementById('bmiResult').innerHTML = html;
+            } catch (error) {
+                document.getElementById('bmiResult').innerHTML = `<div class="alert danger">Error: ${error.message}</div>`;
+            }
+        }
+
+        async function calculateHydration() {
+            const weight = parseFloat(document.getElementById('hydrationWeight').value);
+            const activity = document.getElementById('activityLevel').value;
+
+            if (!weight) {
+                alert('Enter weight');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/tools/hydration`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ weight_kg: weight, activity_level: activity })
+                });
+
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+                const data = await response.json();
+                
+                let html = '<div class="result-box">';
+                html += `<h3>Daily Intake: ${data.daily_intake_liters.toFixed(1)} L</h3>`;
+                html += `<p><strong>Per Hour:</strong> ${(data.daily_intake_liters / 16).toFixed(2)} L</p>`;
+                html += `<p><strong>Tip:</strong> ${data.recommendation}</p>`;
+                html += '</div>';
+                
+                document.getElementById('hydrationResult').innerHTML = html;
+            } catch (error) {
+                document.getElementById('hydrationResult').innerHTML = `<div class="alert danger">Error: ${error.message}</div>`;
+            }
+        }
+
+        async function recallMemory() {
+            const query = document.getElementById('memoryQuery').value;
+
+            if (!query.trim()) {
+                alert('Enter a search query');
+                return;
+            }
+
+            document.getElementById('memoryResult').innerHTML = '<div class="loading"></div>Searching...';
+
+            setTimeout(() => {
+                document.getElementById('memoryResult').innerHTML = `
+                    <div class="result-box">
+                        <h3>Query: "${escapeHtml(query)}"</h3>
+                        <p>Memory is stored in FAISS. All interactions are automatically indexed and retrieved using semantic similarity. The system learns from each query.</p>
+                    </div>
+                `;
+            }, 300);
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === 'Enter' && document.getElementById('chat-tab').classList.contains('active')) {
+                sendChatQuery();
+            }
+        });
+
+        window.addEventListener('load', async () => {
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                if (!response.ok) throw new Error();
+            } catch (error) {
+                console.warn('Backend not available');
+            }
+        });
+    </script>
+</body>
+</html>

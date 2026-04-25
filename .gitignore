@@ -1,0 +1,53 @@
+# -----------------------------
+# Python / virtual environments
+# -----------------------------
+.venv/
+venv/
+env/
+ENV/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# -----------------------------
+# Testing / coverage / tooling
+# -----------------------------
+.pytest_cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+.pyre/
+
+# -----------------------------
+# Environment / local config
+# -----------------------------
+.env
+.env.*
+!.env.example
+
+# -----------------------------
+# Build / package artifacts
+# -----------------------------
+build/
+dist/
+*.egg-info/
+
+# -----------------------------
+# OS / editor files
+# -----------------------------
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# -----------------------------
+# Project runtime artifacts
+# -----------------------------
+storage/*.mp3
+storage/input_*
+storage/faiss/
+storage/memory_faiss/
+data/memory/memory_records.json
