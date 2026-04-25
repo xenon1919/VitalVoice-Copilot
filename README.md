@@ -21,33 +21,43 @@ Production-grade multi-agent, voice-enabled AI system for safe health guidance.
 
 ## Quick Start
 
-### 1. Install
+### 1. Install `uv`
+If you don't have `uv` installed:
 ```bash
-python -m venv .venv
-.venv\\Scripts\\activate
-pip install -r requirements.txt
+pip install uv
+```
+
+### 2. Create virtual environment
+```bash
+uv venv
+.venv\Scripts\activate
+```
+
+### 3. Sync dependencies
+```bash
+uv sync
 ```
 
 Optional (Coqui TTS backend):
 ```bash
-pip install TTS==0.22.0
+uv pip install TTS==0.22.0
 ```
 
-### 2. Configure
+### 4. Configure
 ```bash
 copy .env.example .env
 ```
 Set `GEMINI_API_KEY` in `.env`.
 
-### 3. Add RAG docs
+### 5. Add RAG docs
 Place `.txt`, `.md`, or `.pdf` files in `data/docs/`.
 
-### 4. Build RAG index
+### 6. Build RAG index
 ```bash
 python -m app.scripts.build_rag_index
 ```
 
-### 5. Run API
+### 7. Run API
 ```bash
 uvicorn app.main:app --reload
 ```
@@ -70,5 +80,6 @@ pytest -q
 ```
 
 ## Notes
+- This project uses `uv` for fast, reliable dependency management with `pyproject.toml`.
 - Coqui TTS is optional and requires additional model assets on first run.
 - gTTS is the default and may require internet access.
